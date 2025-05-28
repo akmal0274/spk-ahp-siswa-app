@@ -10,10 +10,11 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <!-- Bootstrap 4 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     <!-- SB Admin 2 CSS via CDN (if needed, else custom CSS removed) -->
     <link href="https://cdn.jsdelivr.net/gh/StartBootstrap/startbootstrap-sb-admin-2@4.1.3/css/sb-admin-2.min.css" rel="stylesheet">
@@ -37,6 +38,11 @@
             background-color: #1e1e2f;
             color: #fff;
         }
+
+        .bg-custom {
+            background-color: #b2b2b2; /* ganti sesuai kebutuhan */
+        }
+
     </style>
 </head>
 
@@ -49,7 +55,7 @@
             <div id="content">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top" style="box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);">
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
@@ -61,9 +67,8 @@
                     <ul class="navbar-nav ml-auto">
                         <div class="topbar-divider d-none d-sm-block"></div>
                         <li class="nav-item dropdown no-arrow">
-                            <a class="dropdown-item" href="{{ route('logout') }}" data-toggle="modal" data-target="#logoutModal">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw"></i> {{ __('Logout') }}
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                             </a>
                         </li>
                     </ul>
@@ -87,9 +92,9 @@
                 </div>
             </div>
 
-            <footer class="sticky-footer bg-white shadow">
+            <footer class="sticky-footer bg-white" style="box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);">
                 <div class="container my-auto text-center text-black">
-                    <span>&copy; Sekolah Indonesia</span>
+                    <span style="color: black;">&copy; Sekolah Indonesia</span>
                 </div>
             </footer>
         </div>
@@ -124,6 +129,7 @@
     <!-- JS Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js"></script>
 
     <!-- DataTables -->

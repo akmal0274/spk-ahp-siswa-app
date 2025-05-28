@@ -15,10 +15,14 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['web','auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AuthController::class, 'dashboard'])->name('dashboard.admin');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 Route::middleware(['web','auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard.user');
+    // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+Route::middleware(['web'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
