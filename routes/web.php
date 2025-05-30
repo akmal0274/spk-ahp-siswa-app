@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KriteriaController;
+use App\Http\Controllers\AlternatifController;
+use App\Http\Controllers\PerbandinganKriteriaController;
 
 
 Route::get('/', function(){
@@ -15,6 +18,26 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['web','auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AuthController::class, 'dashboard'])->name('dashboard.admin');
+
+    // KRITERIA
+    Route::get('/admin/kriteria', [KriteriaController::class, 'index'])->name('kriteria.index.admin');
+    Route::get('/admin/kriteria/create', [KriteriaController::class, 'create'])->name('kriteria.create.admin');
+    Route::post('/admin/kriteria', [KriteriaController::class, 'store'])->name('kriteria.store.admin');
+    Route::get('/admin/kriteria/{kriteria}/edit', [KriteriaController::class, 'edit'])->name('kriteria.edit.admin');
+    Route::put('/admin/kriteria/{kriteria}', [KriteriaController::class, 'update'])->name('kriteria.update.admin');
+    Route::delete('/admin/kriteria/{kriteria}', [KriteriaController::class, 'destroy'])->name('kriteria.destroy.admin');
+
+    // ALTERNATIF
+    Route::get('/admin/alternatif', [AlternatifController::class, 'index'])->name('alternatif.index.admin');
+    Route::get('/admin/alternatif/create', [AlternatifController::class, 'create'])->name('alternatif.create.admin');
+    Route::post('/admin/alternatif', [AlternatifController::class, 'store'])->name('alternatif.store.admin');
+    Route::get('/admin/alternatif/{alternatif}/edit', [AlternatifController::class, 'edit'])->name('alternatif.edit.admin');
+    Route::put('/admin/alternatif/{alternatif}', [AlternatifController::class, 'update'])->name('alternatif.update.admin');
+    Route::delete('/admin/alternatif/{alternatif}', [AlternatifController::class, 'destroy'])->name('alternatif.destroy.admin');
+
+    //PERBANDINGAN KRITERIA
+    Route::get('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'index'])->name('perbandingan-kriteria.index.admin');
+    Route::post('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'store'])->name('perbandingan-kriteria.store.admin');
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

@@ -10,33 +10,33 @@
 
     <!-- Dashboard -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('dashboard.admin') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
     </li>
 
-    <!-- Master -->
+    <!-- Kriteria -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('kriteria.index.admin') }}">
             <i class="fas fa-fw fa-database"></i>
-            <span>Master</span>
+            <span>Kriteria</span>
         </a>
     </li>
 
-    <!-- Projects -->
+    <!-- Alternatif -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('alternatif.index.admin') }}">
             <i class="fas fa-fw fa-clipboard-list"></i>
-            <span>Projects</span>
+            <span>Alternatif</span>
         </a>
     </li>
 
-    <!-- Reports -->
+    <!-- Perbandingan Kriteria -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{  route('perbandingan-kriteria.index.admin') }}">
             <i class="fas fa-fw fa-chart-bar"></i>
-            <span>Reports</span>
+            <span>Perbandingan Kriteria</span>
         </a>
     </li>
 

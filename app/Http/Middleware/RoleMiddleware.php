@@ -16,8 +16,13 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, $role)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            abort(403, 'Unauthorized');
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if (Auth::user()->role !== $role) {
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Anda tidak memiliki akses ke halaman ini');
         }
 
         return $next($request);

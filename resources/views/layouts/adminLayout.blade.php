@@ -60,9 +60,9 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    <button id="theme-toggle" class="btn btn-outline-dark">
+                    <!-- <button id="theme-toggle" class="btn btn-outline-dark">
                         Dark <i class="fas fa-toggle-off"></i>
-                    </button>
+                    </button> -->
 
                     <ul class="navbar-nav ml-auto">
                         <div class="topbar-divider d-none d-sm-block"></div>
