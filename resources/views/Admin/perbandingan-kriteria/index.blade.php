@@ -12,68 +12,67 @@
             <div class="card-body">
                 <form method="POST" action="{{ route('perbandingan-kriteria.store.admin') }}">
                     @csrf
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="text-center">Kriteria</th>
-                                    @foreach($kriteria as $k)
-                                        <th class="text-center">{{ $k->nama_kriteria }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($kriteria as $k1)
-                                    <tr>
-                                        <td class="font-weight-bold bg-light">
-                                            {{ $k1->nama_kriteria }}
-                                        </td>
-                                        @foreach($kriteria as $k2)
-                                            <td class="text-center align-middle">
-                                                @if($k1->id == $k2->id)
-                                                    <input type="text" 
-                                                        class="form-control text-center bg-white" 
-                                                        value="1" 
-                                                        readonly>
-                                                @elseif($k1->id < $k2->id)
-                                                    @php
-                                                        // Cara lebih reliable untuk get existing value
-                                                        $existing = $perbandingan->filter(function($item) use ($k1, $k2) {
-                                                            return $item->kriteria1_id == $k1->id && 
-                                                                $item->kriteria2_id == $k2->id;
-                                                        })->first();
-                                                    @endphp
-                                                    <select name="perbandingan[{{ $k1->id }}][{{ $k2->id }}]" 
-                                                            class="form-control select-perbandingan"
-                                                            data-row="{{ $k1->id }}" 
-                                                            data-col="{{ $k2->id }}">
-                                                        @for($i = 1; $i <= 9; $i++)
-                                                            <option value="{{ $i }}"
-                                                                {{ ($existing && $existing->nilai == $i) ? 'selected' : '' }}>
-                                                                {{ $i }}
-                                                            </option>
-                                                        @endfor
-                                                    </select>
-                                                @else
-                                                    @php
-                                                        $inverse = $perbandingan->filter(function($item) use ($k1, $k2) {
-                                                            return $item->kriteria1_id == $k2->id && 
-                                                                $item->kriteria2_id == $k1->id;
-                                                        })->first();
-                                                    @endphp
-                                                    <input type="text" 
-                                                        class="form-control text-center bg-light" 
-                                                        value="{{ $inverse ? number_format($inverse->nilai, 2) : '' }}" 
-                                                        readonly
-                                                        data-row="{{ $k2->id }}" 
-                                                        data-col="{{ $k1->id }}">
-                                                @endif
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="container">
+                        <div class="row font-weight-bold text-gray-900 mb-2">
+                            <div class="col-md-4">Pasangan Kriteria</div>
+                            <div class="col-md-4">Arah Perbandingan</div>
+                            <div class="col-md-4">Nilai Kepentingan</div>
+                        </div>
+
+                        @foreach($kriteria as $k1)
+                            @foreach($kriteria as $k2)
+                                @if($k1->id != $k2->id)
+                                    @php
+                                        $existing = $perbandingan->firstWhere(fn($item) =>
+                                            ($item->kriteria1_id == $k1->id && $item->kriteria2_id == $k2->id) ||
+                                            ($item->kriteria1_id == $k2->id && $item->kriteria2_id == $k1->id)
+                                        );
+
+                                        // Tentukan arah default berdasarkan existing data
+                                        if ($existing) {
+                                            $arah = $existing->kriteria1_id == $k1->id ? 'AB' : 'BA';
+                                            $nilai = $existing->nilai;
+                                        } else {
+                                            $arah = 'AB'; // Default arah
+                                            $nilai = 1;    // Default nilai
+                                        }
+                                    @endphp
+
+                                    <!-- Hanya tampilkan satu versi (A-B atau B-A) -->
+                                    @if($k1->id < $k2->id)
+                                        <div class="row align-items-center mb-2">
+                                            <div class="col-md-4 text-gray-900">
+                                                <strong>{{ $k1->nama_kriteria }}</strong> vs 
+                                                <strong>{{ $k2->nama_kriteria }}</strong>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <select name="arah[{{ $k1->id }}][{{ $k2->id }}]" 
+                                                        class="form-control arah-select">
+                                                    <option value="AB" {{ $arah == 'AB' ? 'selected' : '' }}>
+                                                        {{ $k1->nama_kriteria }} lebih penting
+                                                    </option>
+                                                    <option value="BA" {{ $arah == 'BA' ? 'selected' : '' }}>
+                                                        {{ $k2->nama_kriteria }} lebih penting
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <select name="nilai[{{ $k1->id }}][{{ $k2->id }}]" 
+                                                        class="form-control nilai-select">
+                                                    @for($n = 1; $n <= 9; $n++)
+                                                        <option value="{{ $n }}" {{ $nilai == $n ? 'selected' : '' }}>
+                                                            {{ $n }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            @endforeach
+                        @endforeach
                     </div>
 
                     <div class="mt-4">
@@ -95,22 +94,59 @@
             </div>
         </div>
     </div>
+
+    @if ($perbandingan->count() > 0)
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title text-gray-900">Perbandingan Nilai Kriteria</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Kriteria</th>
+                                    @foreach ($kriteriaIds as $colId)
+                                        <th>{{ $kriteriaList[$colId] ?? $colId }}</th>
+                                    @endforeach
+                                    <th>Priority Vector</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($kriteriaIds as $rowId)
+                                    <tr>
+                                        <th>{{ $kriteriaList[$rowId] ?? $rowId }}</th>
+                                        @foreach ($kriteriaIds as $colId)
+                                            <td>{{ number_format($matrix[$rowId][$colId], 4) }}</td>
+                                        @endforeach
+                                        <td><strong>{{ number_format($eigen_vector[$rowId], 4) }}</strong></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                        <br>
+
+                    <h4>Nilai Konsistensi</h4>
+                    <ul>
+                        <li>λ<sub>max</sub>: <strong>{{ number_format($lambda_max, 4) }}</strong></li>
+                        <li>Consistency Index (CI): <strong>{{ number_format($ci, 4) }}</strong></li>
+                        <li>Consistency Ratio (CR): <strong>{{ number_format($cr, 4) }}</strong></li>
+                        @if ($cr < 0.1)
+                            <li style="color: green;"><strong>✔ Konsisten</strong></li>
+                        @else
+                            <li style="color: red;"><strong>✘ Tidak Konsisten</strong> – Harap perbaiki perbandingan.</li>
+                        @endif
+                    </ul>
+                    
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('scripts')
-    <script>
-    $(document).ready(function() {
-        // Gunakan jQuery untuk kompatibilitas lebih baik
-        $('body').on('change', '.select-perbandingan', function() {
-            const row = $(this).data('row');
-            const col = $(this).data('col');
-            const value = parseFloat($(this).val());
-            
-            if (value > 0) {
-                const inverseValue = (1/value).toFixed(2);
-                $(`input[data-row="${col}"][data-col="${row}"]`).val(inverseValue);
-            }
-        });
-    });
-    </script>
+    
 @endsection
