@@ -17,4 +17,14 @@ class Alternatif extends Model
         'kelas', 
         'jenis_kelamin'
     ];
+
+    public function perbandingan()
+    {
+        return $this->hasMany(PerbandinganAlternatif::class, 'alternatif1_id');
+    }
+
+    public function perbandingan2()
+    {
+        return $this->hasMany(PerbandinganAlternatif::class, 'alternatif2_id');
+    }
 }

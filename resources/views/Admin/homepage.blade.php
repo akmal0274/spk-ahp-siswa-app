@@ -4,8 +4,36 @@
 <div class="container-fluid d-flex flex-column" style="min-height: calc(100vh - 60px);">
     <div class="row flex-grow-1 justify-content-center align-items-center">
         <div class="col-md-12 text-center">
-            <h3 style="color: black;">Selamat datang, {{ auth()->user()->name }}!</h3>
-            <h2 class="mt-3" style="color: black;">Sistem SPK Siswa Dengan AHP</h2>
+            <div class="row">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title text-gray-900">Total Kriteria</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="text-primary">{{ session('kriteria') }}</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title text-gray-900">Total Alternatif</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="text-primary">{{ session('alternatif') }}</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title text-gray-900">Total User</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="text-primary">{{ session('userCount') }}</h1>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Alternatif;
+use App\Models\Kriteria;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,7 +30,22 @@ class AuthController extends Controller
 
             // Redirect berdasarkan role
             if ($user->role === 'admin') {
-                return redirect()->intended('/admin');
+                $kriteria = Kriteria::all()->count();
+                $alternatif = Alternatif::all()->count();
+                $userCount = User::where('role', 'user')->count();
+
+                if ($kriteria == 0) {
+                    $kriteria=0;
+                }
+
+                if ($alternatif == 0) {
+                    $alternatif=0;
+                }
+
+                if($user == 0) {
+                    $user=0;
+                }
+                return redirect()->intended('/admin')->with('kriteria', $kriteria)->with('alternatif', $alternatif)->with('userCount', $userCount);
             } elseif ($user->role === 'user') {
                 return redirect()->intended('/dashboard');
             } else {

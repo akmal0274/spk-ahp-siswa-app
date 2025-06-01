@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\PerbandinganKriteriaController;
+use App\Http\Controllers\PerbandinganAlternatifController;
+use App\Http\Controllers\RankingAkhirController;
 
 
 Route::get('/', function(){
@@ -38,6 +40,21 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
     //PERBANDINGAN KRITERIA
     Route::get('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'index'])->name('perbandingan-kriteria.index.admin');
     Route::post('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'store'])->name('perbandingan-kriteria.store.admin');
+
+    //HASIL PERBANDINGAN KRITERIA
+    Route::get('/admin/hasil-perbandingan-kriteria', [PerbandinganKriteriaController::class, 'hitungHasilPerbandingan'])->name('hasil-perbandingan-kriteria.index.admin');
+
+    //PERBANDINGAN ALTERNATIF
+    Route::get('/admin/perbandingan-alternatif', [PerbandinganAlternatifController::class, 'index'])->name('perbandingan-alternatif.index.admin');
+    Route::get('/admin/perbandingan-alternatif/bandingkan/{id}', [PerbandinganAlternatifController::class, 'bandingkan'])->name('perbandingan-alternatif.bandingkan.admin');
+    Route::post('/admin/perbandingan-alternatif', [PerbandinganAlternatifController::class, 'store'])->name('perbandingan-alternatif.store.admin');
+
+    //HASIL PERBANDINGAN ALTERNATIF
+    Route::get('/admin/hasil-perbandingan-alternatif', [PerbandinganAlternatifController::class, 'index_hasil'])->name('hasil-perbandingan-alternatif.index.admin');
+    Route::get('/admin/hasil-perbandingan-alternatif/{id}', [PerbandinganAlternatifController::class, 'prosesAHP'])->name('hasil-perbandingan-alternatif.show.admin');
+
+    //RANKING AKHIR
+    Route::get('/admin/ranking-akhir', [RankingAkhirController::class, 'index'])->name('ranking-akhir.index.admin');
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

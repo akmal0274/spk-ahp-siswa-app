@@ -17,9 +17,16 @@ class PerbandinganKriteriaController extends Controller
         $kriteria = Kriteria::all();
         $perbandingan = PerbandinganKriteria::all();
 
+        return view('Admin.perbandingan-kriteria.index', compact('kriteria', 'perbandingan'));
+    }
+
+    public function hitungHasilPerbandingan(){
+        $kriteria = Kriteria::all();
+        $perbandingan = PerbandinganKriteria::all();
         $kriteriaIds = Kriteria::pluck('id')->toArray();
         $n = count($kriteriaIds);
-        $matrix = [];
+        
+        $matrix  = [];
 
         foreach ($kriteriaIds as $rowId) {
             foreach ($kriteriaIds as $colId) {
@@ -37,8 +44,7 @@ class PerbandinganKriteriaController extends Controller
         $ci = $consistencyResult['ci'];
         $cr = $consistencyResult['cr'];
 
-
-        return view('Admin.perbandingan-kriteria.index', compact('kriteria', 'perbandingan', 'matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaIds'));
+        return view('Admin.hasil-perbandingan-kriteria.index', compact('kriteria','kriteriaIds','matrix','normalized', 'eigen_vector', 'lambda_max', 'ci', 'cr'));
     }
 
     /**
@@ -70,14 +76,14 @@ class PerbandinganKriteriaController extends Controller
 
         $matrix = $this->buildComparisonMatrix($kriteriaIds, $nilaiInput, $arahInput);
 
-        $eigenResult = $this->calculateEigenVector($matrix, $kriteriaIds);
-        $normalized = $eigenResult['normalized'];
-        $eigen_vector = $eigenResult['eigen_vector'];
+        // $eigenResult = $this->calculateEigenVector($matrix, $kriteriaIds);
+        // $normalized = $eigenResult['normalized'];
+        // $eigen_vector = $eigenResult['eigen_vector'];
 
-        $consistencyResult = $this->calculateConsistencyRatio($matrix, $eigen_vector, $kriteriaIds);
-        $lambda_max = $consistencyResult['lambda_max'];
-        $ci = $consistencyResult['ci'];
-        $cr = $consistencyResult['cr'];
+        // $consistencyResult = $this->calculateConsistencyRatio($matrix, $eigen_vector, $kriteriaIds);
+        // $lambda_max = $consistencyResult['lambda_max'];
+        // $ci = $consistencyResult['ci'];
+        // $cr = $consistencyResult['cr'];
 
         foreach ($kriteriaIds as $id1) {
             foreach ($kriteriaIds as $id2) {
@@ -98,13 +104,7 @@ class PerbandinganKriteriaController extends Controller
         $kriteria = Kriteria::all();
         $perbandingan = PerbandinganKriteria::all();
 
-        // Jika konsisten, simpan ke database
-        if ($cr < 0.1) {            
-            return view('Admin.perbandingan-kriteria.index', compact('matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaList', 'kriteriaIds', 'kriteria', 'perbandingan'))->with(['success' => true, 'message' => 'Data berhasil disimpan karena konsisten.']);
-        } else {
-            return view('Admin.perbandingan-kriteria.index', compact('matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaList', 'kriteriaIds', 'kriteria', 'perbandingan'))->with(['success' => true, 'message' => 'Data berhasil disimpan tapi tidak konsisten.']);
-        }
-
+        return view('Admin.perbandingan-kriteria.index', compact('kriteria', 'perbandingan', 'kriteriaList'))->with('success', 'Perbandingan kriteria berhasil disimpan.');
     }
 
     /**
