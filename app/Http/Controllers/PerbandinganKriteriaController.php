@@ -17,7 +17,28 @@ class PerbandinganKriteriaController extends Controller
         $kriteria = Kriteria::all();
         $perbandingan = PerbandinganKriteria::all();
 
-        return view('Admin.perbandingan-kriteria.index', compact('kriteria', 'perbandingan'));
+        $kriteriaIds = Kriteria::pluck('id')->toArray();
+        $n = count($kriteriaIds);
+        $matrix = [];
+
+        foreach ($kriteriaIds as $rowId) {
+            foreach ($kriteriaIds as $colId) {
+                $matrix[$rowId][$colId] = $perbandingan->where('kriteria1_id', $rowId)->where('kriteria2_id', $colId)->first()->nilai;
+            }
+        }
+
+        $eigenResult = $this->calculateEigenVector($matrix, $kriteriaIds);
+        $normalized = $eigenResult['normalized'];
+        $eigen_vector = $eigenResult['eigen_vector'];
+
+        $consistencyResult = $this->calculateConsistencyRatio($matrix, $eigen_vector, $kriteriaIds);
+
+        $lambda_max = $consistencyResult['lambda_max'];
+        $ci = $consistencyResult['ci'];
+        $cr = $consistencyResult['cr'];
+
+
+        return view('Admin.perbandingan-kriteria.index', compact('kriteria', 'perbandingan', 'matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaIds'));
     }
 
     /**
@@ -27,6 +48,8 @@ class PerbandinganKriteriaController extends Controller
     {
         //
     }
+
+    
 
     /**
      * Store a newly created resource in storage.
@@ -44,128 +67,42 @@ class PerbandinganKriteriaController extends Controller
 
         $kriteriaIds = Kriteria::pluck('id')->toArray();
         $n = count($kriteriaIds);
-        // dd($kriteriaIds);
 
-        // Bangun matriks perbandingan dari input
-        $matrix = [];
+        $matrix = $this->buildComparisonMatrix($kriteriaIds, $nilaiInput, $arahInput);
+
+        $eigenResult = $this->calculateEigenVector($matrix, $kriteriaIds);
+        $normalized = $eigenResult['normalized'];
+        $eigen_vector = $eigenResult['eigen_vector'];
+
+        $consistencyResult = $this->calculateConsistencyRatio($matrix, $eigen_vector, $kriteriaIds);
+        $lambda_max = $consistencyResult['lambda_max'];
+        $ci = $consistencyResult['ci'];
+        $cr = $consistencyResult['cr'];
 
         foreach ($kriteriaIds as $id1) {
             foreach ($kriteriaIds as $id2) {
-                if ($id1 == $id2) {
-                    $matrix[$id1][$id2] = 1.0; // Diagonal = 1
-                    continue;
-                }
-
-                // Cek apakah perbandingan ada di A→B atau B→A
-                $nilai = null;
-                $arah = null;
-
-                if (isset($nilaiInput[$id1][$id2]) && isset($arahInput[$id1][$id2])) {
-                    $nilai = (float)$nilaiInput[$id1][$id2];
-                    $arah = $arahInput[$id1][$id2];
-                } elseif (isset($nilaiInput[$id2][$id1]) && isset($arahInput[$id2][$id1])) {
-                    $nilai = (float)$nilaiInput[$id2][$id1];
-                    $arah = $arahInput[$id2][$id1] == 'AB' ? 'BA' : 'BA';
-                }
-
-                // Jika tidak ada data, beri nilai default atau lempar error
-                if ($nilai === null || $arah === null) {
-                    throw new \Exception("Missing comparison for {$id1} vs {$id2}");
-                }
-
-                // Bangun matriks berdasarkan arah
-                if ($arah === 'AB') {
-                    $matrix[$id1][$id2] = (float)$nilai;
-                    $matrix[$id2][$id1] = round(1 / (float)$nilai, 4);
-                } else { // BA
-                    $matrix[$id2][$id1] = (float)$nilai;
-                    $matrix[$id1][$id2] = round(1 / (float)$nilai, 4);
-                }
+                $nilaiFinal = $matrix[$id1][$id2];
+                PerbandinganKriteria::updateOrCreate(
+                    [
+                        'kriteria1_id' => $id1,
+                        'kriteria2_id' => $id2,
+                    ],
+                    [
+                        'nilai' => $nilaiFinal,
+                    ]
+                );
             }
         }
 
-        // dd($matrix);
-
-        // Hitung eigen vector
-        $columnSums = [];
-        foreach ($kriteriaIds as $j) {
-            $columnSums[$j] = 0;
-            foreach ($kriteriaIds as $i) {
-                $columnSums[$j] += $matrix[$i][$j];
-            }
-        }
-
-        $normalized = [];
-        $eigen_vector = [];
-        foreach ($kriteriaIds as $i) {
-            $sumRow = 0;
-            foreach ($kriteriaIds as $j) {
-                $normalized[$i][$j] = $matrix[$i][$j] / $columnSums[$j];
-                $sumRow += $normalized[$i][$j];
-            }
-            $eigen_vector[$i] = round($sumRow / $n, 4);
-        }
-
-        // Hitung lambda max
-        $lambda_max = 0;
-        foreach ($kriteriaIds as $i) {
-            $weightedSum = 0;
-            foreach ($kriteriaIds as $j) {
-                $weightedSum += $matrix[$i][$j] * $eigen_vector[$j];
-            }
-            $lambda_max += $weightedSum / $eigen_vector[$i];
-        }
-        $lambda_max = $lambda_max / $n;
-
-        // Hitung CI & CR
-        $ci = ($lambda_max - $n) / ($n - 1);
-        $riTable = [0.00, 0.00, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
-        $ri = $riTable[$n - 1] ?? 1.49;
-        $cr = ($ri == 0) ? 0 : $ci / $ri;
+        $kriteriaList = Kriteria::whereIn('id', $kriteriaIds)->pluck('nama_kriteria', 'id')->toArray();
+        $kriteria = Kriteria::all();
+        $perbandingan = PerbandinganKriteria::all();
 
         // Jika konsisten, simpan ke database
-        if ($cr < 0.1) {
-            foreach ($kriteriaIds as $id1) {
-                foreach ($kriteriaIds as $id2) {
-                    if ($id1 === $id2) continue;
-                    $nilaiFinal = $matrix[$id1][$id2];
-                    PerbandinganKriteria::updateOrCreate(
-                        [
-                            'kriteria1_id' => $id1,
-                            'kriteria2_id' => $id2,
-                        ],
-                        [
-                            'nilai' => $nilaiFinal,
-                        ]
-                    );
-                }
-            }
-
-            // (Opsional) Simpan bobot kriteria dari eigen vector
-            // foreach ($eigen_vector as $id => $bobot) {
-            //     BobotKriteria::updateOrCreate(
-            //         ['kriteria_id' => $id],
-            //         ['bobot' => $bobot]
-            //     );
-            // }
-
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Data disimpan karena konsisten.',
-            //     'eigen_vector' => $eigen_vector,
-            //     'lambda_max' => round($lambda_max, 4),
-            //     'ci' => round($ci, 4),
-            //     'cr' => round($cr, 4),
-            // ]);
-            $kriteriaList = Kriteria::whereIn('id', $kriteriaIds)->pluck('nama_kriteria', 'id')->toArray();
-            $kriteria = Kriteria::all();
-            $perbandingan = PerbandinganKriteria::all();
-
-
+        if ($cr < 0.1) {            
             return view('Admin.perbandingan-kriteria.index', compact('matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaList', 'kriteriaIds', 'kriteria', 'perbandingan'))->with(['success' => true, 'message' => 'Data berhasil disimpan karena konsisten.']);
         } else {
-            dd($matrix, $eigen_vector, $lambda_max, $ci, $cr);
-            return redirect()->back()->withErrors('Perbandingan tidak konsisten. Harap periksa kembali input.');
+            return view('Admin.perbandingan-kriteria.index', compact('matrix', 'eigen_vector', 'lambda_max', 'ci', 'cr', 'kriteriaList', 'kriteriaIds', 'kriteria', 'perbandingan'))->with(['success' => true, 'message' => 'Data berhasil disimpan tapi tidak konsisten.']);
         }
 
     }
@@ -201,4 +138,123 @@ class PerbandinganKriteriaController extends Controller
     {
         //
     }
+
+    function buildComparisonMatrix(array $kriteriaIds, array $nilaiInput, array $arahInput): array
+    {
+        $matrix = [];
+        
+        foreach ($kriteriaIds as $id1) {
+            foreach ($kriteriaIds as $id2) {
+                if ($id1 == $id2) {
+                    $matrix[$id1][$id2] = 1.0; // Diagonal = 1
+                    continue;
+                }
+
+                // Check if comparison exists in A→B or B→A
+                $nilai = null;
+                $arah = null;
+
+                if (isset($nilaiInput[$id1][$id2]) && isset($arahInput[$id1][$id2])) {
+                    $nilai = (float)$nilaiInput[$id1][$id2];
+                    $arah = $arahInput[$id1][$id2];
+                } elseif (isset($nilaiInput[$id2][$id1]) && isset($arahInput[$id2][$id1])) {
+                    $nilai = (float)$nilaiInput[$id2][$id1];
+                    $arah = $arahInput[$id2][$id1] == 'AB' ? 'BA' : 'BA';
+                }
+
+                // If no data, throw error
+                if ($nilai === null || $arah === null) {
+                    throw new \Exception("Missing comparison for {$id1} vs {$id2}");
+                }
+
+                // Build matrix based on direction
+                if ($arah === 'AB') {
+                    $matrix[$id1][$id2] = (float)$nilai;
+                    $matrix[$id2][$id1] = round(1 / (float)$nilai, 4);
+                } else { // BA
+                    $matrix[$id2][$id1] = (float)$nilai;
+                    $matrix[$id1][$id2] = round(1 / (float)$nilai, 4);
+                }
+            }
+        }
+        
+        return $matrix;
+    }
+
+    /**
+     * Calculates the eigen vector from a comparison matrix
+     * 
+     * @param array $matrix The comparison matrix
+     * @param array $kriteriaIds Array of criteria IDs
+     * @return array Array with 'normalized' matrix and 'eigen_vector' values
+     */
+    function calculateEigenVector(array $matrix, array $kriteriaIds): array
+    {
+        $n = count($kriteriaIds);
+        $columnSums = [];
+        
+        // Calculate column sums
+        foreach ($kriteriaIds as $j) {
+            $columnSums[$j] = 0;
+            foreach ($kriteriaIds as $i) {
+                $columnSums[$j] += $matrix[$i][$j];
+            }
+        }
+
+        // Normalize and calculate eigen vector
+        $normalized = [];
+        $eigen_vector = [];
+        
+        foreach ($kriteriaIds as $i) {
+            $sumRow = 0;
+            foreach ($kriteriaIds as $j) {
+                $normalized[$i][$j] = $matrix[$i][$j] / $columnSums[$j];
+                $sumRow += $normalized[$i][$j];
+            }
+            $eigen_vector[$i] = round($sumRow / $n, 4);
+        }
+        
+        return [
+            'normalized' => $normalized,
+            'eigen_vector' => $eigen_vector
+        ];
+    }
+
+    /**
+     * Calculates consistency ratio (CR) for AHP
+     * 
+     * @param array $matrix The comparison matrix
+     * @param array $eigen_vector The eigen vector values
+     * @param array $kriteriaIds Array of criteria IDs
+     * @return array Array with 'lambda_max', 'ci', 'cr' values
+     */
+    function calculateConsistencyRatio(array $matrix, array $eigen_vector, array $kriteriaIds): array
+    {
+        $n = count($kriteriaIds);
+        
+        // Calculate lambda max
+        $lambda_max = 0;
+        foreach ($kriteriaIds as $i) {
+            $weightedSum = 0;
+            foreach ($kriteriaIds as $j) {
+                $weightedSum += $matrix[$i][$j] * $eigen_vector[$j];
+            }
+            $lambda_max += $weightedSum / $eigen_vector[$i];
+        }
+        $lambda_max = $lambda_max / $n;
+
+        // Calculate CI & CR
+        $ci = ($lambda_max - $n) / ($n - 1);
+        $riTable = [0.00, 0.00, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+        $ri = $riTable[$n - 1] ?? 1.49;
+        $cr = ($ri == 0) ? 0 : $ci / $ri;
+
+        return [
+            'lambda_max' => $lambda_max,
+            'ci' => $ci,
+            'cr' => $cr
+        ];
+    }
+
+    
 }

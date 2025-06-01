@@ -96,10 +96,10 @@
     </div>
 
     @if ($perbandingan->count() > 0)
-        <div class="col-md-12">
+        <div class="col-md-12 my-4">
             <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="modal-title text-gray-900">Perbandingan Nilai Kriteria</h5>
+                    <h5 class="modal-title text-gray-900">Matriks Nilai Kriteria</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -108,7 +108,7 @@
                                 <tr>
                                     <th>Kriteria</th>
                                     @foreach ($kriteriaIds as $colId)
-                                        <th>{{ $kriteriaList[$colId] ?? $colId }}</th>
+                                        <th>{{ $colId->nama_kriteria ?? $colId }}</th>
                                     @endforeach
                                     <th>Priority Vector</th>
                                 </tr>
@@ -116,7 +116,7 @@
                             <tbody>
                                 @foreach ($kriteriaIds as $rowId)
                                     <tr>
-                                        <th>{{ $kriteriaList[$rowId] ?? $rowId }}</th>
+                                        <th>{{ $rowId->nama_kriteria ?? $rowId }}</th>
                                         @foreach ($kriteriaIds as $colId)
                                             <td>{{ number_format($matrix[$rowId][$colId], 4) }}</td>
                                         @endforeach
@@ -129,15 +129,15 @@
 
                         <br>
 
-                    <h4>Nilai Konsistensi</h4>
+                    <h4 class="text-gray-900">Nilai Konsistensi</h4>
                     <ul>
-                        <li>λ<sub>max</sub>: <strong>{{ number_format($lambda_max, 4) }}</strong></li>
-                        <li>Consistency Index (CI): <strong>{{ number_format($ci, 4) }}</strong></li>
-                        <li>Consistency Ratio (CR): <strong>{{ number_format($cr, 4) }}</strong></li>
+                        <li class="text-gray-900">λ<sub>max</sub>: <strong>{{ number_format($lambda_max, 4) }}</strong></li>
+                        <li class="text-gray-900">Consistency Index (CI): <strong>{{ number_format($ci, 4) }}</strong></li>
+                        <li class="text-gray-900">Consistency Ratio (CR): <strong>{{ number_format($cr * 100, 2) }}%</strong></li>
                         @if ($cr < 0.1)
                             <li style="color: green;"><strong>✔ Konsisten</strong></li>
                         @else
-                            <li style="color: red;"><strong>✘ Tidak Konsisten</strong> – Harap perbaiki perbandingan.</li>
+                            <li style="color: red;"><strong>✘ Tidak Konsisten (Nilai Consistency Ratio lebih besar dari 10%)</strong> – Harap perbaiki perbandingan.</li>
                         @endif
                     </ul>
                     

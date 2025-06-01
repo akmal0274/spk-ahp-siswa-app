@@ -92,7 +92,7 @@
                 </div>
             </div>
 
-            <footer class="sticky-footer bg-white" style="box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);">
+            <footer class="sticky-footer bg-white">
                 <div class="container my-auto text-center text-black">
                     <span style="color: black;">&copy; Sekolah Indonesia</span>
                 </div>
