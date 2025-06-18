@@ -7,7 +7,7 @@ use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\PerbandinganKriteriaController;
 use App\Http\Controllers\PerbandinganAlternatifController;
 use App\Http\Controllers\RankingAkhirController;
-
+use App\Http\Controllers\UserController;
 
 Route::get('/', function(){
     return redirect('/login');
@@ -16,6 +16,8 @@ Route::get('/', function(){
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
 });
 
 Route::middleware(['web','auth', 'role:admin'])->group(function () {
@@ -60,6 +62,9 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
 
 Route::middleware(['web','auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard.user');
+    Route::get('/profil', [UserController::class, 'profil'])->name('profil.user');
+
+    Route::get('/ranking-akhir', [RankingAkhirController::class, 'index'])->name('ranking-akhir.user');
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

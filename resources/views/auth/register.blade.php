@@ -7,19 +7,27 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h2 class="text-center mb-4">
-                        <b>LOGIN</b><br>
+                        <b>REGISTER</b><br>
                         <small>SPK AHP SD Negeri Blok I Cilegon</small>
                     </h2>
                     <hr>
-                    
-                    @if(session('error'))
+
+                    @if($errors->any())
                     <div class="alert alert-danger">
-                        <{{session('error')}}
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                     @endif
 
-                    <form action="{{ route('login') }}" method="post">
+                    <form action="{{ route('register') }}" method="post">
                         @csrf
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" name="name" class="form-control" placeholder="Nama Lengkap" required>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Email" required>
@@ -28,9 +36,13 @@
                             <label class="form-label">Password</label>
                             <input type="password" name="password" class="form-control" placeholder="Password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Log In</button>
+                        <div class="mb-3">
+                            <label class="form-label">Konfirmasi Password</label>
+                            <input type="password" name="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Register</button>
                         <hr>
-                        <p class="text-center mb-0">Belum punya akun? <a href="{{ route('register.form') }}">Register</a> sekarang!</p>
+                        <p class="text-center mb-0">Sudah punya akun? <a href="{{ route('login') }}">Login</a> sekarang!</p>
                     </form>
                 </div>
             </div>

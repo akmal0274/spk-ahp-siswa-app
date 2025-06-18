@@ -19,7 +19,7 @@
     <!-- Kriteria -->
     <li class="nav-item {{ request()->routeIs('kriteria.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('kriteria.index.admin') }}">
-            <i class="fas fa-fw fa-database"></i>
+            <i class="fas fa-tags"></i>
             <span>Kelola Kriteria</span>
         </a>
     </li>
@@ -27,7 +27,7 @@
     <!-- Alternatif -->
     <li class="nav-item {{ request()->routeIs('alternatif.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('alternatif.index.admin') }}">
-            <i class="fas fa-fw fa-clipboard-list"></i>
+            <i class="fas fa-list"></i>
             <span>Kelola Alternatif</span>
         </a>
     </li>
@@ -35,7 +35,7 @@
     <!-- Perbandingan Kriteria -->
     <li class="nav-item {{ request()->routeIs('perbandingan-kriteria.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{  route('perbandingan-kriteria.index.admin') }}">
-            <i class="fas fa-fw fa-chart-bar"></i>
+            <i class="fas fa-balance-scale"></i>
             <span>Perbandingan Kriteria</span>
         </a>
     </li>
@@ -43,7 +43,7 @@
     <!-- Hasil Perbandingan Kriteria -->
     <li class="nav-item {{ request()->routeIs('hasil-perbandingan-kriteria.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('hasil-perbandingan-kriteria.index.admin') }}">
-            <i class="fas fa-fw fa-cogs"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Hasil Perbandingan Kriteria</span>
         </a>
     </li>
@@ -51,21 +51,23 @@
     <!-- Perbandingan Alternatif -->
     <li class="nav-item {{ request()->routeIs('perbandingan-alternatif.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('perbandingan-alternatif.index.admin') }}">
-            <i class="fas fa-fw fa-cogs"></i>
+            <i class="fas fa-exchange-alt"></i>
             <span>Perbandingan Alternatif</span>
         </a>
     </li>
 
+    <!-- Hasil Perbandingan Alternatif -->
     <li class="nav-item {{ request()->routeIs('hasil-perbandingan-alternatif.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('hasil-perbandingan-alternatif.index.admin') }}">
-            <i class="fas fa-fw fa-cogs"></i>
+            <i class="fas fa-poll"></i>
             <span>Hasil Perbandingan Alternatif</span>
         </a>
     </li>
 
+    <!-- Ranking Akhir -->
     <li class="nav-item {{ request()->routeIs('ranking-akhir.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('ranking-akhir.index.admin') }}">
-            <i class="fas fa-fw fa-cogs"></i>
+            <i class="fas fa-medal"></i>
             <span>Ranking Akhir</span>
         </a>
     </li>

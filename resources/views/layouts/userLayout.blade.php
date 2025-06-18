@@ -13,7 +13,7 @@
     <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <!-- Bootstrap 4 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
     <!-- SB Admin 2 CSS via CDN (if needed, else custom CSS removed) -->
@@ -30,6 +30,10 @@
 
     <!-- Custom style in-page (dark mode, etc) -->
     <style>
+        html, body {
+            height: 100%;
+        }
+        
         .vertical-center {
             vertical-align: middle;
             line-height: 20px;
@@ -43,36 +47,70 @@
             background-color: #b2b2b2; /* ganti sesuai kebutuhan */
         }
 
+        /* CSS untuk active bar */
+        .navbar-nav .nav-item.active .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background-color: #4e73df;
+            border-radius: 3px;
+        }
+
+        .carousel-inner {
+            max-height: 500px; /* Sesuaikan nilai ini */
+        }
+        .carousel-item img {
+            object-fit: cover; /* Gambar akan menutupi area tanpa distorsi */
+            height: 100%;
+            width: 100%;
+        }
+
+
     </style>
 </head>
 
 <body id="page-top">
 
-    <div id="wrapper">
-        @include('partials.sidebar')
+    <div id="wrapper" class="min-vh-100">
+        {{-- @include('partials.sidebar') --}}
 
         <div id="content-wrapper" class="d-flex flex-column bg-dark-mode">
             <div id="content">
 
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top" style="box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);">
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
-
-                    <!-- <button id="theme-toggle" class="btn btn-outline-dark">
-                        Dark <i class="fas fa-toggle-off"></i>
-                    </button> -->
-
+                    
+                    <!-- Menu Kanan -->
                     <ul class="navbar-nav ml-auto">
+                        <li class="nav-item mx-2 {{ request()->routeIs('dashboard.user') ? 'active' : '' }}">
+                            <a class="nav-link text-dark mx-2" href="{{ route('dashboard.user') }}">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2 {{ request()->routeIs('profil.user') ? 'active' : '' }}">
+                            <a class="nav-link text-dark mx-2" href="{{ route('profil.user') }}">
+                                Profil
+                            </a>
+                        </li>
+                        <li class="nav-item mx-2 {{ request()->routeIs('ranking-akhir.user') ? 'active' : '' }}">
+                            <a class="nav-link text-dark mx-2" href="{{ route('ranking-akhir.user') }}">
+                                Ranking
+                            </a>
+                        </li>
                         <div class="topbar-divider d-none d-sm-block"></div>
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#" data-toggle="modal" data-target="#logoutModal">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw"></i> {{ __('Logout') }}
                             </a>
                         </li>
                     </ul>
                 </nav>
+
+
 
                 <div class="container-fluid">
                     @if (session()->has('message'))
@@ -159,6 +197,8 @@
             document.getElementById('logout-form').submit();
         }
     </script>
+    <!-- Di sebelum </body> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Optional Custom Script (if any) -->
     @yield('scripts')

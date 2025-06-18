@@ -7,6 +7,7 @@ use App\Models\Kriteria;
 use App\Models\PerbandinganKriteria;
 use App\Models\PerbandinganAlternatif;
 use App\Models\Alternatif;
+use Illuminate\Support\Facades\Auth;
 
 class RankingAkhirController extends Controller
 {
@@ -73,7 +74,14 @@ class RankingAkhirController extends Controller
             $nilaiAkhir[$alt->id] = $total;
         }
 
-        return view('Admin.ranking-akhir.index', compact('alternatif', 'nilaiAkhir'));
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return view('Admin.ranking-akhir.index', compact('alternatif', 'nilaiAkhir'));
+        }
+        else {
+            return view('ranking-akhir', compact('alternatif', 'nilaiAkhir'));
+        }
+
     }
 
     function calculateEigenVector(array $matrix, array $kriteriaIds): array
