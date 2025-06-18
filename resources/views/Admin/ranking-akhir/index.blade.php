@@ -3,8 +3,9 @@
 @section('content')
     <div class="col-md-12 my-4">
         <div class="card shadow">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="text-gray-900">Hasil Akhir Pemilihan Alternatif</h5>
+                <a href="{{ route('ranking-akhir.export-excel.admin') }}" class="btn btn-m btn-success">Export Excel</a>
             </div>
             <div class="card-body">
                 <table class="table table-bordered">
