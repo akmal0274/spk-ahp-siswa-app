@@ -8,6 +8,8 @@ use App\Models\PerbandinganKriteria;
 use App\Models\PerbandinganAlternatif;
 use App\Models\Alternatif;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class RankingAkhirController extends Controller
 {
@@ -114,6 +116,94 @@ class RankingAkhirController extends Controller
             'normalized' => $normalized,
             'eigen_vector' => $eigen_vector
         ];
+    }
+
+    public function exportExcel(){
+        $kriteria = Kriteria::all();
+        $perbandingan = PerbandinganKriteria::all();
+        $kriteriaIds = Kriteria::pluck('id')->toArray();
+        $alternatif = Alternatif::all();
+
+        $matrix_kriteria = [];
+
+        foreach ($kriteriaIds as $rowId) {
+            foreach ($kriteriaIds as $colId) {
+                $matrix_kriteria[$rowId][$colId] = $perbandingan->where('kriteria1_id', $rowId)->where('kriteria2_id', $colId)->first()->nilai;
+            }
+        }
+
+        $eigen_kriteria = $this->calculateEigenVector($matrix_kriteria, $kriteriaIds);
+        $bobotKriteria = $eigen_kriteria['eigen_vector'];
+
+        $nilaiAkhir = [];
+        foreach ($alternatif as $alt) {
+            $total = 0;
+            foreach ($kriteria as $k) {
+                $rel = PerbandinganAlternatif::where('kriteria_id', $k->id)->get();
+                $altIds = $alternatif->pluck('id')->toArray();
+
+                // Bangun matriks alternatif untuk kriteria ini
+                $matrix = [];
+                foreach ($altIds as $i) {
+                    foreach ($altIds as $j) {
+                        if ($i == $j) {
+                            $matrix[$i][$j] = 1;
+                        } else {
+                            // Ambil nilai langsung
+                            $nilaiLangsung = $rel->first(function ($item) use ($i, $j) {
+                                return $item->alternatif1_id == $i && $item->alternatif2_id == $j;
+                            });
+
+                            // Jika tidak ada, ambil nilai kebalikannya
+                            if ($nilaiLangsung) {
+                                $matrix[$i][$j] = $nilaiLangsung->nilai;
+                            } else {
+                                $nilaiKebalikan = $rel->first(function ($item) use ($i, $j) {
+                                    return $item->alternatif1_id == $j && $item->alternatif2_id == $i;
+                                });
+
+                                $matrix[$i][$j] = $nilaiKebalikan ? 1 / $nilaiKebalikan->nilai : 1;
+                            }
+                        }
+                    }
+                }
+
+                $eigenAlt = $this->calculateEigenVector($matrix, $altIds);
+                $bobotAlternatif = $eigenAlt['eigen_vector'];
+
+                $total += $bobotKriteria[$k->id] * ($bobotAlternatif[$alt->id] ?? 0);
+            }
+
+            $nilaiAkhir[$alt->id] = $total;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header
+        $sheet->setCellValue('A1', 'Peringkat');
+        $sheet->setCellValue('B1', 'Nama Siswa');
+        $sheet->setCellValue('C1', 'Skor Akhir');
+
+        // Data
+        $ranked = collect($nilaiAkhir)->sortDesc();
+        $row = 2;
+        $peringkat = 1;
+        foreach ($ranked as $alt_id => $skor) {
+            $sheet->setCellValue('A' . $row, $peringkat++);
+            $sheet->setCellValue('B' . $row, $alternatif->find($alt_id)->nama_siswa ?? 'Unknown');
+            $sheet->setCellValue('C' . $row, number_format($skor, 4));
+            $row++;
+        }
+
+        // Auto download
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'hasil_pemilihan_siswa.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
+        exit;
     }
 
     /**

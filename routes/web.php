@@ -66,6 +66,7 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
 
     //RANKING AKHIR
     Route::get('/admin/ranking-akhir', [RankingAkhirController::class, 'index'])->name('ranking-akhir.index.admin');
+    Route::get('/admin/ranking-akhir/export', [RankingAkhirController::class, 'exportExcel'])->name('ranking-akhir.export-excel.admin');
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
@@ -74,6 +75,8 @@ Route::middleware(['web','auth', 'role:user'])->group(function () {
     Route::get('/profil', [UserController::class, 'profil'])->name('profil.user');
 
     Route::get('/ranking-akhir', [RankingAkhirController::class, 'index'])->name('ranking-akhir.user');
+    Route::get('/ranking-akhir/export', [RankingAkhirController::class, 'exportExcel'])->name('ranking-akhir.export-excel');
+    
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
