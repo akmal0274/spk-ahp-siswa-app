@@ -31,4 +31,9 @@ class Kriteria extends Model
         return $this->hasMany(PerbandinganAlternatif::class, 'kriteria_id');
     }
 
+    public function subkriteria()
+    {
+        return $this->hasMany(Subkriteria::class, 'kriteria_id');
+    }
+
 }

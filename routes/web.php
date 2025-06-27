@@ -7,6 +7,7 @@ use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\PerbandinganKriteriaController;
 use App\Http\Controllers\PerbandinganAlternatifController;
 use App\Http\Controllers\RankingAkhirController;
+use App\Http\Controllers\SubkriteriaController;
 use App\Http\Controllers\UserController;
 
 Route::get('/', function(){
@@ -30,6 +31,14 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
     Route::get('/admin/kriteria/{kriteria}/edit', [KriteriaController::class, 'edit'])->name('kriteria.edit.admin');
     Route::put('/admin/kriteria/{kriteria}', [KriteriaController::class, 'update'])->name('kriteria.update.admin');
     Route::delete('/admin/kriteria/{kriteria}', [KriteriaController::class, 'destroy'])->name('kriteria.destroy.admin');
+
+    // SUBKRITERIA
+    Route::get('/admin/subkriteria', [SubkriteriaController::class, 'index'])->name('subkriteria.index.admin');
+    Route::get('/admin/subkriteria/{kriteria}/create', [SubkriteriaController::class, 'create'])->name('subkriteria.create.admin');
+    Route::post('/admin/subkriteria', [SubkriteriaController::class, 'store'])->name('subkriteria.store.admin');
+    Route::get('/admin/subkriteria/{subkriteria}/edit', [SubkriteriaController::class, 'edit'])->name('subkriteria.edit.admin');
+    Route::put('/admin/subkriteria/{subkriteria}', [SubkriteriaController::class, 'update'])->name('subkriteria.update.admin');
+    Route::delete('/admin/subkriteria/{subkriteria}', [SubkriteriaController::class, 'destroy'])->name('subkriteria.destroy.admin');
 
     // ALTERNATIF
     Route::get('/admin/alternatif', [AlternatifController::class, 'index'])->name('alternatif.index.admin');

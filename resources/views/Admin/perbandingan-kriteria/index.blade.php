@@ -78,10 +78,25 @@
                     <div class="mt-4">
                         <div class="alert alert-info">
                             <strong>Petunjuk Pengisian:</strong> 
-                            <ul class="mb-0">
-                                <li>Skala 1-9 (1 = Sama penting, 9 = Sangat lebih penting)</li>
-                                <li>Nilai pecahan (1/2, 1/3, dst.) akan otomatis terisi</li>
-                            </ul>
+                            <ol>
+                                <li>Gunakan skala 1 sampai 9 untuk menunjukkan tingkat kepentingan antar kriteria:
+                                    <ul>
+                                    <li>1 = Sama penting</li>
+                                    <li>2 = Nilai antara Sama dan Cukup penting</li>
+                                    <li>3 = Cukup lebih penting</li>
+                                    <li>4 = Nilai antara Cukup penting dan Penting</li>
+                                    <li>5 = Lebih penting</li>
+                                    <li>6 = Nilai antara Penting dan Sangat penting</li>
+                                    <li>7 = Sangat lebih penting</li>
+                                    <li>8 = Nilai antara Sangat penting dan Mutlak</li>
+                                    <li>9 = Mutlak lebih penting</li>
+                                    </ul>
+                                </li>
+                                <li>Pilih arah perbandingan terlebih dahulu, lalu isi nilai kepentingan sesuai penilaian.</li>
+                                <li>Jika kamu memilih "Nilai Rapor lebih penting" dengan nilai 4, maka sistem akan otomatis mengisi kebalikannya ("Kehadiran vs Nilai Rapor") dengan 1/4.</li>
+                                <li>Tidak perlu mengisi nilai pecahan secara manual. Sistem akan menghitung otomatis.</li>
+                                <li>Pastikan semua pasangan kriteria sudah dibandingkan sebelum klik "Simpan Perbandingan".</li>
+                            </ol>
                         </div>
 
                         <div class="d-flex justify-content-end">

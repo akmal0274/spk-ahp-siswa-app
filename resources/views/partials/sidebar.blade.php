@@ -24,11 +24,11 @@
         </a>
     </li>
 
-    <!-- Alternatif -->
-    <li class="nav-item {{ request()->routeIs('alternatif.index.admin') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('alternatif.index.admin') }}">
-            <i class="fas fa-list"></i>
-            <span>Kelola Alternatif</span>
+    <!-- Subkriteria -->
+    <li class="nav-item {{ request()->routeIs('subkriteria.index.admin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('subkriteria.index.admin') }}">
+            <i class="fas fa-tags"></i>
+            <span>Kelola Subkriteria</span>
         </a>
     </li>
 
@@ -45,6 +45,14 @@
         <a class="nav-link" href="{{ route('hasil-perbandingan-kriteria.index.admin') }}">
             <i class="fas fa-chart-bar"></i>
             <span>Hasil Perbandingan Kriteria</span>
+        </a>
+    </li>
+
+    <!-- Alternatif -->
+    <li class="nav-item {{ request()->routeIs('alternatif.index.admin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('alternatif.index.admin') }}">
+            <i class="fas fa-list"></i>
+            <span>Kelola Alternatif</span>
         </a>
     </li>
 
