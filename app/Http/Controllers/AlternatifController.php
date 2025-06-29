@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Alternatif;
+use App\Models\Kriteria;
+use App\Models\NilaiAlternatif;
+use App\Models\Subkriteria;
 use Illuminate\Support\Facades\DB;
 
 class AlternatifController extends Controller
@@ -14,9 +17,10 @@ class AlternatifController extends Controller
      */
     public function index()
     {
-        $alternatif = Alternatif::all();
+        $alternatif = Alternatif::with(['nilai_alternatif.subkriteria'])->get();
+        $kriteria = Kriteria::all();
 
-        return view('Admin.alternatif.index', compact('alternatif'));
+        return view('Admin.alternatif.index', compact('alternatif', 'kriteria'));
     }
 
     /**
@@ -24,7 +28,9 @@ class AlternatifController extends Controller
      */
     public function create()
     {
-        return view('Admin.alternatif.create');
+        $kriteria = Kriteria::all();
+        $subkriteria = Subkriteria::all();
+        return view('Admin.alternatif.create', compact('kriteria', 'subkriteria'));
     }
 
     /**
@@ -32,25 +38,73 @@ class AlternatifController extends Controller
      */
     public function store(Request $request)
     {
-        $alternatifValidated = $request->validate([
+        // 1️⃣ Validasi data dasar
+        $request->validate([
             'nis' => 'required|unique:alternatif,nis',
             'nama_siswa' => 'required',
             'kelas' => 'required',
-            'jenis_kelamin' => 'required',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tahun_ajaran' => 'required',
+            'kriteria' => 'required|array',
+            'tingkat_lomba' => 'required|integer',
+            'peringkat_lomba' => 'required|integer',
         ]);
 
-        try {
-            DB::beginTransaction();
+        // 2️⃣ Simpan data alternatif
+        $alternatif = Alternatif::create([
+            'nis' => $request->nis,
+            'nama_siswa' => $request->nama_siswa,
+            'kelas' => $request->kelas,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'tahun_ajaran' => $request->tahun_ajaran,
+        ]);
 
-            $alternatif = Alternatif::create($alternatifValidated);
-
-            DB::commit();
-            return redirect()->route('alternatif.index.admin')->with('success', 'Data alternatif berhasil ditambahkan');
-
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->route('alternatif.index.admin')->with('error', 'Data alternatif gagal ditambahkan');
+        // 3️⃣ Simpan nilai kriteria (selain Prestasi)
+        foreach ($request->kriteria as $kriteria_id => $subkriteria_id) {
+            NilaiAlternatif::create([
+                'alternatif_id' => $alternatif->id,
+                'kriteria_id' => $kriteria_id,
+                'subkriteria_id' => $subkriteria_id,
+            ]);
         }
+
+        $tingkat_lomba = $request->tingkat_lomba;
+        $peringkat_lomba = $request->peringkat_lomba;
+
+        $prestasi = (int)$tingkat_lomba + (int)$peringkat_lomba;
+
+        if($prestasi == 7){
+            $subkriteria = Subkriteria::where('nama_subkriteria', 'Sangat Unggul (Skor = 7)')->first();
+            NilaiAlternatif::create([
+                'alternatif_id' => $alternatif->id,
+                'kriteria_id' => $subkriteria->kriteria_id,
+                'subkriteria_id' => $subkriteria->id,
+            ]);
+        }else if ($prestasi>=5 && $prestasi<=6){ 
+            $subkriteria = Subkriteria::where('nama_subkriteria', 'Unggul (Skor = 5-6)')->first();
+            NilaiAlternatif::create([
+                'alternatif_id' => $alternatif->id,
+                'kriteria_id' => $subkriteria->kriteria_id,
+                'subkriteria_id' => $subkriteria->id,
+            ]);
+        }else if ($prestasi>=3 && $prestasi<=4){ 
+            $subkriteria = Subkriteria::where('nama_subkriteria', 'Cukup Layak (Skor = 3-4)')->first();
+            NilaiAlternatif::create([
+                'alternatif_id' => $alternatif->id,
+                'kriteria_id' => $subkriteria->kriteria_id,
+                'subkriteria_id' => $subkriteria->id,
+            ]);
+        }else{
+            $subkriteria = Subkriteria::where('nama_subkriteria', 'Belum Memadai (Skor = 1-2)')->first();
+            NilaiAlternatif::create([
+                'alternatif_id' => $alternatif->id,
+                'kriteria_id' => $subkriteria->kriteria_id,
+                'subkriteria_id' => $subkriteria->id,
+            ]);
+        }
+
+        return redirect()->route('alternatif.index.admin')
+                        ->with('success', 'Data alternatif berhasil disimpan.');
     }
 
     /**
@@ -100,7 +154,7 @@ class AlternatifController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         try {
             DB::beginTransaction();

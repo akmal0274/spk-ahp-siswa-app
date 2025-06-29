@@ -19,6 +19,10 @@
                             <th>Nama Siswa</th>
                             <th>Kelas</th>
                             <th>Jenis Kelamin</th>
+                            <th>Tahun Ajaran</th>
+                            @foreach ($kriteria as $k)
+                                <th>{{ $k->nama_kriteria }}</th>
+                            @endforeach
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -31,21 +35,28 @@
                                 <td>{{ $a->nama_siswa }}</td>
                                 <td>{{ $a->kelas }}</td>
                                 <td>{{ $a->jenis_kelamin }}</td>
+                                <td>{{ $a->tahun_ajaran }}</td>
+                                @foreach ($kriteria as $k)
+                                    @php
+                                        $nilai = $a->nilai_alternatif->where('kriteria_id', $k->id)->first();
+                                    @endphp
+                                    <td>{{ $nilai ? $nilai->subkriteria->nama_subkriteria : '-' }}</td>
+                                @endforeach
                                 <td>
                                     <a href="{{ route('alternatif.edit.admin', $a->id) }}" class="btn btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('alternatif.destroy.admin',$a->id) }}" method="post" class="d-inline">
+                                    <form action="{{ route('alternatif.destroy.admin', $a->id) }}" method="post" class="d-inline">
                                         @csrf
                                         @method('delete')
-                                        <button type="submit" class="btn btn-danger " onclick="return confirm('Apakah anda yakin untuk menghapus project ini?')"><i class="fas fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-danger " onclick="return confirm('Apakah anda yakin untuk menghapus alternatif ini?')"><i class="fas fa-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="text-center">Belum ada data alternatif</td>
+                                <td colspan="11" class="text-center">Belum ada data alternatif</td>
                             </tr>
                         @endif
                     </tbody>

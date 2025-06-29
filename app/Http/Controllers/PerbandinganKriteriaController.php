@@ -21,6 +21,20 @@ class PerbandinganKriteriaController extends Controller
     }
 
     public function hitungHasilPerbandingan(){
+        $hasil = $this->hitungAHP();
+        $kriteria = $hasil['kriteria'];
+        $kriteriaIds = $hasil['kriteriaIds'];
+        $matrix = $hasil['matrix'];
+        $normalized = $hasil['normalized'];
+        $eigen_vector = $hasil['eigen_vector'];
+        $lambda_max = $hasil['lambda_max'];
+        $ci = $hasil['ci'];
+        $cr = $hasil['cr'];
+
+        return view('Admin.hasil-perbandingan-kriteria.index', compact('kriteria','kriteriaIds','matrix','normalized', 'eigen_vector', 'lambda_max', 'ci', 'cr'));
+    }
+
+    public function hitungAHP(){
         $kriteria = Kriteria::all();
         $perbandingan = PerbandinganKriteria::all();
         $kriteriaIds = Kriteria::pluck('id')->toArray();
@@ -44,7 +58,16 @@ class PerbandinganKriteriaController extends Controller
         $ci = $consistencyResult['ci'];
         $cr = $consistencyResult['cr'];
 
-        return view('Admin.hasil-perbandingan-kriteria.index', compact('kriteria','kriteriaIds','matrix','normalized', 'eigen_vector', 'lambda_max', 'ci', 'cr'));
+        return [
+            'kriteria' => $kriteria,
+            'kriteriaIds' => $kriteriaIds,
+            'matrix' => $matrix,
+            'normalized' => $normalized,
+            'eigen_vector' => $eigen_vector,
+            'lambda_max' => $lambda_max,
+            'ci' => $ci,
+            'cr' => $cr
+        ];
     }
 
     /**

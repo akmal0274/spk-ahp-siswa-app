@@ -21,4 +21,9 @@ class Subkriteria extends Model
     {
         return $this->belongsTo(Kriteria::class);
     }
+
+    public function nilai_alternatif()
+    {
+        return $this->hasMany(NilaiAlternatif::class, 'subkriteria_id');
+    }
 }

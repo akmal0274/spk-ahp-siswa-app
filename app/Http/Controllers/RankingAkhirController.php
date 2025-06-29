@@ -16,75 +16,80 @@ class RankingAkhirController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $kriteria = Kriteria::all();
-        $perbandingan = PerbandinganKriteria::all();
-        $kriteriaIds = Kriteria::pluck('id')->toArray();
-        $alternatif = Alternatif::all();
+        $ahp = (new PerbandinganKriteriaController)->hitungAHP();
+        $eigen_vector = $ahp['eigen_vector'];
 
-        $matrix_kriteria = [];
+        // Ambil semua tahun ajaran untuk dropdown
+        $tahunAjarans = Alternatif::distinct()->pluck('tahun_ajaran');
 
-        foreach ($kriteriaIds as $rowId) {
-            foreach ($kriteriaIds as $colId) {
-                $matrix_kriteria[$rowId][$colId] = $perbandingan->where('kriteria1_id', $rowId)->where('kriteria2_id', $colId)->first()->nilai;
-            }
-        }
+        $ranking = [];
 
-        $eigen_kriteria = $this->calculateEigenVector($matrix_kriteria, $kriteriaIds);
-        $bobotKriteria = $eigen_kriteria['eigen_vector'];
+        // Jika user pilih filter tahun ajaran
+        if ($request->filled('tahun_ajaran')) {
+            $tahun = $request->tahun_ajaran;
 
-        $nilaiAkhir = [];
-        foreach ($alternatif as $alt) {
-            $total = 0;
-            foreach ($kriteria as $k) {
-                $rel = PerbandinganAlternatif::where('kriteria_id', $k->id)->get();
-                $altIds = $alternatif->pluck('id')->toArray();
+            $alternatifs = Alternatif::with(['nilai_alternatif.subkriteria'])
+                ->where('tahun_ajaran', $tahun)
+                ->get();
 
-                // Bangun matriks alternatif untuk kriteria ini
-                $matrix = [];
-                foreach ($altIds as $i) {
-                    foreach ($altIds as $j) {
-                        if ($i == $j) {
-                            $matrix[$i][$j] = 1;
-                        } else {
-                            // Ambil nilai langsung
-                            $nilaiLangsung = $rel->first(function ($item) use ($i, $j) {
-                                return $item->alternatif1_id == $i && $item->alternatif2_id == $j;
-                            });
+            $result = [];
 
-                            // Jika tidak ada, ambil nilai kebalikannya
-                            if ($nilaiLangsung) {
-                                $matrix[$i][$j] = $nilaiLangsung->nilai;
-                            } else {
-                                $nilaiKebalikan = $rel->first(function ($item) use ($i, $j) {
-                                    return $item->alternatif1_id == $j && $item->alternatif2_id == $i;
-                                });
-
-                                $matrix[$i][$j] = $nilaiKebalikan ? 1 / $nilaiKebalikan->nilai : 1;
-                            }
-                        }
-                    }
+            foreach ($alternatifs as $alt) {
+                $total = 0;
+                foreach ($alt->nilai_alternatif as $nilai) {
+                    $bobot_kriteria = $eigen_vector[$nilai->kriteria_id] ?? 0;
+                    $bobot_subkriteria = $nilai->subkriteria->nilai ?? 0;
+                    $total += $bobot_kriteria * $bobot_subkriteria;
                 }
 
-                $eigenAlt = $this->calculateEigenVector($matrix, $altIds);
-                $bobotAlternatif = $eigenAlt['eigen_vector'];
-
-                $total += $bobotKriteria[$k->id] * ($bobotAlternatif[$alt->id] ?? 0);
+                $result[] = [
+                    'alternatif' => $alt,
+                    'skor' => $total,
+                ];
             }
 
-            $nilaiAkhir[$alt->id] = $total;
+            usort($result, fn ($a, $b) => $b['skor'] <=> $a['skor']);
+
+            $ranking[$tahun] = $result;
+
+        } else {
+            // Tidak ada filter → hitung semua tahun ajaran
+            foreach ($tahunAjarans as $tahun) {
+                $alternatifs = Alternatif::with(['nilai_alternatif.subkriteria'])
+                    ->where('tahun_ajaran', $tahun)
+                    ->get();
+
+                $result = [];
+
+                foreach ($alternatifs as $alt) {
+                    $total = 0;
+                    foreach ($alt->nilai_alternatif as $nilai) {
+                        $bobot_kriteria = $eigen_vector[$nilai->kriteria_id] ?? 0;
+                        $bobot_subkriteria = $nilai->subkriteria->nilai ?? 0;
+                        $total += $bobot_kriteria * $bobot_subkriteria;
+                    }
+
+                    $result[] = [
+                        'alternatif' => $alt,
+                        'skor' => $total,
+                    ];
+                }
+
+                usort($result, fn ($a, $b) => $b['skor'] <=> $a['skor']);
+
+                $ranking[$tahun] = $result;
+            }
         }
 
-        $user = Auth::user();
-        if ($user->role === 'admin') {
-            return view('Admin.ranking-akhir.index', compact('alternatif', 'nilaiAkhir'));
+        if (Auth::user()->role === 'admin') {
+            return view('Admin.ranking-akhir.index', compact('ranking', 'tahunAjarans'));
+        } else {
+            return view('ranking-akhir', compact('ranking', 'tahunAjarans'));
         }
-        else {
-            return view('ranking-akhir', compact('alternatif', 'nilaiAkhir'));
-        }
+}
 
-    }
 
     function calculateEigenVector(array $matrix, array $kriteriaIds): array
     {
@@ -118,86 +123,67 @@ class RankingAkhirController extends Controller
         ];
     }
 
-    public function exportExcel(){
-        $kriteria = Kriteria::all();
-        $perbandingan = PerbandinganKriteria::all();
-        $kriteriaIds = Kriteria::pluck('id')->toArray();
-        $alternatif = Alternatif::all();
+    public function exportExcel(Request $request)
+    {
+        $ahp = (new PerbandinganKriteriaController)->hitungAHP();
+        $eigen_vector = $ahp['eigen_vector'];
 
-        $matrix_kriteria = [];
-
-        foreach ($kriteriaIds as $rowId) {
-            foreach ($kriteriaIds as $colId) {
-                $matrix_kriteria[$rowId][$colId] = $perbandingan->where('kriteria1_id', $rowId)->where('kriteria2_id', $colId)->first()->nilai;
-            }
+        if ($request->filled('tahun_ajaran')) {
+            $tahunAjarans = [$request->tahun_ajaran];
+        } else {
+            $tahunAjarans = Alternatif::distinct()->pluck('tahun_ajaran');
         }
 
-        $eigen_kriteria = $this->calculateEigenVector($matrix_kriteria, $kriteriaIds);
-        $bobotKriteria = $eigen_kriteria['eigen_vector'];
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheetIndex = 0;
 
-        $nilaiAkhir = [];
-        foreach ($alternatif as $alt) {
-            $total = 0;
-            foreach ($kriteria as $k) {
-                $rel = PerbandinganAlternatif::where('kriteria_id', $k->id)->get();
-                $altIds = $alternatif->pluck('id')->toArray();
+        foreach ($tahunAjarans as $tahun) {
+            if ($sheetIndex == 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setTitle($tahun);
+            } else {
+                $sheet = $spreadsheet->createSheet();
+                $sheet->setTitle($tahun);
+            }
 
-                // Bangun matriks alternatif untuk kriteria ini
-                $matrix = [];
-                foreach ($altIds as $i) {
-                    foreach ($altIds as $j) {
-                        if ($i == $j) {
-                            $matrix[$i][$j] = 1;
-                        } else {
-                            // Ambil nilai langsung
-                            $nilaiLangsung = $rel->first(function ($item) use ($i, $j) {
-                                return $item->alternatif1_id == $i && $item->alternatif2_id == $j;
-                            });
+            $alternatifs = Alternatif::with(['nilai_alternatif.subkriteria'])
+                ->where('tahun_ajaran', $tahun)
+                ->get();
 
-                            // Jika tidak ada, ambil nilai kebalikannya
-                            if ($nilaiLangsung) {
-                                $matrix[$i][$j] = $nilaiLangsung->nilai;
-                            } else {
-                                $nilaiKebalikan = $rel->first(function ($item) use ($i, $j) {
-                                    return $item->alternatif1_id == $j && $item->alternatif2_id == $i;
-                                });
+            $result = [];
 
-                                $matrix[$i][$j] = $nilaiKebalikan ? 1 / $nilaiKebalikan->nilai : 1;
-                            }
-                        }
-                    }
+            foreach ($alternatifs as $alt) {
+                $total = 0;
+                foreach ($alt->nilai_alternatif as $nilai) {
+                    $bobot_kriteria = $eigen_vector[$nilai->kriteria_id] ?? 0;
+                    $bobot_subkriteria = $nilai->subkriteria->nilai ?? 0;
+                    $total += $bobot_kriteria * $bobot_subkriteria;
                 }
 
-                $eigenAlt = $this->calculateEigenVector($matrix, $altIds);
-                $bobotAlternatif = $eigenAlt['eigen_vector'];
-
-                $total += $bobotKriteria[$k->id] * ($bobotAlternatif[$alt->id] ?? 0);
+                $result[] = [
+                    'alternatif' => $alt,
+                    'skor' => $total,
+                ];
             }
 
-            $nilaiAkhir[$alt->id] = $total;
+            usort($result, fn ($a, $b) => $b['skor'] <=> $a['skor']);
+
+            $sheet->setCellValue('A1', 'Peringkat');
+            $sheet->setCellValue('B1', 'Nama Siswa');
+            $sheet->setCellValue('C1', 'Skor Akhir');
+
+            $row = 2;
+            foreach ($result as $i => $r) {
+                $sheet->setCellValue('A' . $row, $i + 1);
+                $sheet->setCellValue('B' . $row, $r['alternatif']->nama_siswa);
+                $sheet->setCellValue('C' . $row, number_format($r['skor'], 4));
+                $row++;
+            }
+
+            $sheetIndex++;
         }
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Header
-        $sheet->setCellValue('A1', 'Peringkat');
-        $sheet->setCellValue('B1', 'Nama Siswa');
-        $sheet->setCellValue('C1', 'Skor Akhir');
-
-        // Data
-        $ranked = collect($nilaiAkhir)->sortDesc();
-        $row = 2;
-        $peringkat = 1;
-        foreach ($ranked as $alt_id => $skor) {
-            $sheet->setCellValue('A' . $row, $peringkat++);
-            $sheet->setCellValue('B' . $row, $alternatif->find($alt_id)->nama_siswa ?? 'Unknown');
-            $sheet->setCellValue('C' . $row, number_format($skor, 4));
-            $row++;
-        }
-
-        // Auto download
-        $writer = new Xlsx($spreadsheet);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $filename = 'hasil_pemilihan_siswa.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -205,6 +191,8 @@ class RankingAkhirController extends Controller
         $writer->save('php://output');
         exit;
     }
+
+
 
     /**
      * Show the form for creating a new resource.

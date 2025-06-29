@@ -15,7 +15,8 @@ class Alternatif extends Model
         'nis', 
         'nama_siswa', 
         'kelas', 
-        'jenis_kelamin'
+        'jenis_kelamin',
+        'tahun_ajaran'
     ];
 
     public function perbandingan()
@@ -26,5 +27,10 @@ class Alternatif extends Model
     public function perbandingan2()
     {
         return $this->hasMany(PerbandinganAlternatif::class, 'alternatif2_id');
+    }
+
+    public function nilai_alternatif()
+    {
+        return $this->hasMany(NilaiAlternatif::class, 'alternatif_id');
     }
 }

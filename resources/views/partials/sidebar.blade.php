@@ -57,7 +57,7 @@
     </li>
 
     <!-- Perbandingan Alternatif -->
-    <li class="nav-item {{ request()->routeIs('perbandingan-alternatif.index.admin') ? 'active' : '' }}">
+    {{-- <li class="nav-item {{ request()->routeIs('perbandingan-alternatif.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('perbandingan-alternatif.index.admin') }}">
             <i class="fas fa-exchange-alt"></i>
             <span>Perbandingan Alternatif</span>
@@ -70,7 +70,7 @@
             <i class="fas fa-poll"></i>
             <span>Hasil Perbandingan Alternatif</span>
         </a>
-    </li>
+    </li> --}}
 
     <!-- Ranking Akhir -->
     <li class="nav-item {{ request()->routeIs('ranking-akhir.index.admin') ? 'active' : '' }}">

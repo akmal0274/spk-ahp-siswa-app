@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama_siswa');
             $table->string('kelas');
             $table->string('jenis_kelamin');
+            $table->string('tahun_ajaran');
             $table->timestamps();
         });
     }
