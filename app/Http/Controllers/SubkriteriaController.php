@@ -13,7 +13,11 @@ class SubkriteriaController extends Controller
         $kriteria = Kriteria::all();
         $subkriteria = Subkriteria::all();
 
-        return view('Admin.subkriteria.index', compact('kriteria', 'subkriteria'));
+        $nilai_konsistensi = (new PerbandinganKriteriaController)->hitungAHP();
+
+        $cr = $nilai_konsistensi['cr'];
+
+        return view('Admin.subkriteria.index', compact('kriteria', 'subkriteria', 'cr'));
     }
 
     public function create($id)

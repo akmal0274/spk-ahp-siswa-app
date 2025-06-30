@@ -24,14 +24,6 @@
         </a>
     </li>
 
-    <!-- Subkriteria -->
-    <li class="nav-item {{ request()->routeIs('subkriteria.index.admin') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('subkriteria.index.admin') }}">
-            <i class="fas fa-tags"></i>
-            <span>Kelola Subkriteria</span>
-        </a>
-    </li>
-
     <!-- Perbandingan Kriteria -->
     <li class="nav-item {{ request()->routeIs('perbandingan-kriteria.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{  route('perbandingan-kriteria.index.admin') }}">
@@ -45,6 +37,14 @@
         <a class="nav-link" href="{{ route('hasil-perbandingan-kriteria.index.admin') }}">
             <i class="fas fa-chart-bar"></i>
             <span>Hasil Perbandingan Kriteria</span>
+        </a>
+    </li>
+
+    <!-- Subkriteria -->
+    <li class="nav-item {{ request()->routeIs('subkriteria.index.admin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('subkriteria.index.admin') }}">
+            <i class="fas fa-tags"></i>
+            <span>Kelola Subkriteria</span>
         </a>
     </li>
 

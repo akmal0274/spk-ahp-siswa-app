@@ -20,7 +20,11 @@ class AlternatifController extends Controller
         $alternatif = Alternatif::with(['nilai_alternatif.subkriteria'])->get();
         $kriteria = Kriteria::all();
 
-        return view('Admin.alternatif.index', compact('alternatif', 'kriteria'));
+        $nilai_konsistensi = (new PerbandinganKriteriaController)->hitungAHP();
+
+        $cr = $nilai_konsistensi['cr'];
+
+        return view('Admin.alternatif.index', compact('alternatif', 'kriteria', 'cr'));
     }
 
     /**
