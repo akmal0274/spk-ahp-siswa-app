@@ -6,10 +6,18 @@
         <div class="col-md-4">
             <div class="card shadow">
                 <div class="card-body">
-                    <h2 class="text-center mb-4">
-                        <b>LOGIN</b><br>
-                        <small>SPK AHP SD Negeri Blok I Cilegon</small>
-                    </h2>
+                    <div class="text-center mb-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo Sekolah" style="max-width: 100px;">
+
+                            <div style="width: 2px; height: 60px; background-color: #333; margin: 0 20px;"></div>
+                            <div class="text-left">
+                                <b style="font-size: 32px;">LOGIN</b>
+                            </div>
+                        </div>
+                        <small class="d-block mt-2">Sistem Pendukung Keputusan SD Negeri Blok I Cilegon</small>
+                    </div>
+
                     <hr>
                     
                     @if(session('error'))

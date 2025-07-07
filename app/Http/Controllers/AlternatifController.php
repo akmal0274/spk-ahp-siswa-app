@@ -125,7 +125,10 @@ class AlternatifController extends Controller
     public function edit(string $id)
     {
         $alternatif = Alternatif::find($id);
-        return view('Admin.alternatif.edit', compact('alternatif'));
+        $kriteria = Kriteria::all();
+        $subkriteria = Subkriteria::all();
+
+        return view('Admin.alternatif.edit', compact('alternatif', 'kriteria', 'subkriteria'));
     }
 
     /**
@@ -138,6 +141,7 @@ class AlternatifController extends Controller
             'nama_siswa' => 'required',
             'kelas' => 'required',
             'jenis_kelamin' => 'required',
+            'tahun_ajaran' => 'required',
         ]);
 
         try {
@@ -145,6 +149,50 @@ class AlternatifController extends Controller
 
             $alternatif = Alternatif::find($id);
             $alternatif->update($alternatifValidated);
+
+            NilaiAlternatif::where('alternatif_id', $alternatif->id)->delete();
+            foreach ($request->kriteria as $kriteria_id => $subkriteria_id) {
+                NilaiAlternatif::create([
+                    'alternatif_id' => $alternatif->id,
+                    'kriteria_id' => $kriteria_id,
+                    'subkriteria_id' => $subkriteria_id,
+                ]);
+            }
+
+            $tingkat_lomba = $request->tingkat_lomba;
+            $peringkat_lomba = $request->peringkat_lomba;
+
+            $prestasi = (int)$tingkat_lomba + (int)$peringkat_lomba;
+
+            if($prestasi == 7){
+                $subkriteria = Subkriteria::where('nama_subkriteria', 'Sangat Unggul (Skor = 7)')->first();
+                NilaiAlternatif::create([
+                    'alternatif_id' => $alternatif->id,
+                    'kriteria_id' => $subkriteria->kriteria_id,
+                    'subkriteria_id' => $subkriteria->id,
+                ]);
+            }else if ($prestasi>=5 && $prestasi<=6){ 
+                $subkriteria = Subkriteria::where('nama_subkriteria', 'Unggul (Skor = 5-6)')->first();
+                NilaiAlternatif::create([
+                    'alternatif_id' => $alternatif->id,
+                    'kriteria_id' => $subkriteria->kriteria_id,
+                    'subkriteria_id' => $subkriteria->id,
+                ]);
+            }else if ($prestasi>=3 && $prestasi<=4){ 
+                $subkriteria = Subkriteria::where('nama_subkriteria', 'Cukup Layak (Skor = 3-4)')->first();
+                NilaiAlternatif::create([
+                    'alternatif_id' => $alternatif->id,
+                    'kriteria_id' => $subkriteria->kriteria_id,
+                    'subkriteria_id' => $subkriteria->id,
+                ]);
+            }else{
+                $subkriteria = Subkriteria::where('nama_subkriteria', 'Belum Memadai (Skor = 1-2)')->first();
+                NilaiAlternatif::create([
+                    'alternatif_id' => $alternatif->id,
+                    'kriteria_id' => $subkriteria->kriteria_id,
+                    'subkriteria_id' => $subkriteria->id,
+                ]);
+            }
 
             DB::commit();
             return redirect()->route('alternatif.index.admin')->with('success', 'Data alternatif berhasil diupdate');
