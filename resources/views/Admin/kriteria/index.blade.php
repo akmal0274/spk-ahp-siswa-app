@@ -17,6 +17,7 @@
                             <th>No</th>
                             <th>Kode Kriteria</th>
                             <th>Kriteria</th>
+                            <th>Tipe Kriteria</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -27,6 +28,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $k->kode_kriteria }}</td>
                                 <td>{{ $k->nama_kriteria }}</td>
+                                <td>{{ ucfirst($k->tipe_kriteria) }}</td>
                                 <td>
                                     <a href="{{ route('kriteria.edit.admin', $k->id) }}" class="btn btn-warning">
                                         <i class="fas fa-edit"></i>

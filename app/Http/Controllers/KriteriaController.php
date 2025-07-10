@@ -36,6 +36,7 @@ class KriteriaController extends Controller
         $kriteriaValidated = $request->validate([
             'kode_kriteria' => 'required|unique:kriteria,kode_kriteria',
             'nama_kriteria' => 'required',
+            'tipe_kriteria' => 'required',
         ]);
 
         try {
@@ -78,6 +79,7 @@ class KriteriaController extends Controller
         $kriteriaValidated = $request->validate([
             'kode_kriteria' => 'required|exists:kriteria,kode_kriteria',
             'nama_kriteria' => 'required',
+            'tipe_kriteria' => 'required',
         ]);
 
         try {

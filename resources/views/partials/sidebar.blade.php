@@ -56,6 +56,12 @@
         </a>
     </li>
 
+    <li class="nav-item {{ request()->routeIs('perhitungan-keputusan.index.admin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('perhitungan-keputusan.index.admin') }}">
+            <i class="fas fa-table"></i>
+            <span>Perhitungan Keputusan</span>
+        </a>
+    </li>
     <!-- Perbandingan Alternatif -->
     {{-- <li class="nav-item {{ request()->routeIs('perbandingan-alternatif.index.admin') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('perbandingan-alternatif.index.admin') }}">

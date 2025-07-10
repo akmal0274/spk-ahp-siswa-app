@@ -6,6 +6,7 @@ use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\PerbandinganKriteriaController;
 use App\Http\Controllers\PerbandinganAlternatifController;
+use App\Http\Controllers\PerhitunganKeputusanController;
 use App\Http\Controllers\RankingAkhirController;
 use App\Http\Controllers\SubkriteriaController;
 use App\Http\Controllers\UserController;
@@ -48,6 +49,8 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
     Route::put('/admin/alternatif/{alternatif}', [AlternatifController::class, 'update'])->name('alternatif.update.admin');
     Route::delete('/admin/alternatif/{alternatif}', [AlternatifController::class, 'destroy'])->name('alternatif.destroy.admin');
 
+    // PERHITUNGAN KEPUTUSAN
+    Route::get('/admin/perhitungan-keputusan', [PerhitunganKeputusanController::class, 'index'])->name('perhitungan-keputusan.index.admin');
     //PERBANDINGAN KRITERIA
     Route::get('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'index'])->name('perbandingan-kriteria.index.admin');
     Route::post('/admin/perbandingan-kriteria', [PerbandinganKriteriaController::class, 'store'])->name('perbandingan-kriteria.store.admin');
@@ -67,6 +70,9 @@ Route::middleware(['web','auth', 'role:admin'])->group(function () {
     //RANKING AKHIR
     Route::get('/admin/ranking-akhir', [RankingAkhirController::class, 'index'])->name('ranking-akhir.index.admin');
     Route::get('/admin/ranking-akhir/export', [RankingAkhirController::class, 'exportExcel'])->name('ranking-akhir.export-excel.admin');
+    // Route POST untuk validasi
+    Route::post('/admin/ranking-akhir/validasi', [RankingAkhirController::class, 'validasi'])->name('ranking.validasi');
+
     // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

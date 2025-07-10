@@ -23,6 +23,14 @@
                         <input type="text" name="nama_kriteria" class="form-control" 
                             value="{{ old('nama_kriteria', $kriteria->nama_kriteria) }}" required>
                     </div>
+                    <div class="form-group text-gray-900">
+                        <label for="tipe_kriteria">Tipe Kriteria</label>
+                        <select id="tipe_kriteria" name="tipe_kriteria" class="form-control" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="benefit" <?= $kriteria->tipe_kriteria === 'benefit' ? 'selected' : '' ?>>Benefit</option>
+                            <option value="cost" <?= $kriteria->tipe_kriteria === 'cost' ? 'selected' : '' ?>>Cost</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
             </div>
