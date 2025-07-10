@@ -17,7 +17,7 @@
                     </select>
                 </form>
 
-                @if(Auth::user()->role !== 'admin')
+                @if(Auth::user()->role === 'admin')
                 <form method="GET" class="d-inline">
                     <select name="status_validasi" onchange="this.form.submit()" class="form-control d-inline w-auto">
                         <option value="">Semua Status</option>
@@ -25,13 +25,11 @@
                         <option value="Belum" {{ request('status_validasi') == 'Belum' ? 'selected' : '' }}>Belum Divalidasi</option>
                     </select>
                 </form>
-
-                <a href="{{ route('ranking-akhir.export-excel', ['tahun_ajaran' => request('tahun_ajaran')]) }}"
-                   class="btn btn-success btn-m ml-2 mb-2 mb-md-0">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </a>
+                    <a href="{{ route('ranking-akhir.export-excel.admin', ['tahun_ajaran' => request('tahun_ajaran'), 'status_validasi' => request('status_validasi')]) }}" class="btn btn-success btn-m ml-2 mb-2 mb-md-0">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
                 @else
-                    <a href="{{ route('ranking-akhir.export-excel.admin', ['tahun_ajaran' => request('tahun_ajaran')]) }}" class="btn btn-success btn-m ml-2 mb-2 mb-md-0">
+                    <a href="{{ route('ranking-akhir.export-excel', ['tahun_ajaran' => request('tahun_ajaran'), 'status_validasi' => request('status_validasi')]) }}" class="btn btn-success btn-m ml-2 mb-2 mb-md-0">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
                 @endif
@@ -42,7 +40,7 @@
             @forelse ($ranking as $tahun => $rows)
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="text-gray-900">Tahun Ajaran: {{ $tahun }}</h5>
-                    @if(Auth::user()->role === 'admin')
+                    @if(Auth::user()->role !== 'admin')
                         @if(isset($validasi[$tahun]) && $validasi[$tahun] == 1)
                             <span class="badge badge-success">Sudah Divalidasi</span>
                         @else

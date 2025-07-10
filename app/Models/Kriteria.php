@@ -14,6 +14,7 @@ class Kriteria extends Model
     protected $fillable = [
         'kode_kriteria',
         'nama_kriteria',
+        'tipe_kriteria',
     ];
 
     public function perbandinganSebagaiKriteria1()

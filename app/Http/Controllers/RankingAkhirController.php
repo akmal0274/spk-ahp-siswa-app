@@ -31,6 +31,21 @@ class RankingAkhirController extends Controller
         // Filter by tahun ajaran (kalau ada)
         $listTahun = $request->filled('tahun_ajaran') ? [$request->tahun_ajaran] : $tahunAjarans;
 
+        $statusValidasi = $request->status_validasi;
+
+        if ($statusValidasi === 'Sudah') {
+            $listTahun = Alternatif::where('is_valid', 1)
+                ->distinct()
+                ->pluck('tahun_ajaran');
+        } elseif ($statusValidasi === 'Belum') {
+            $listTahun = Alternatif::where(function($q) {
+                    $q->whereNull('is_valid')
+                    ->orWhere('is_valid', 0);
+                })
+                ->distinct()
+                ->pluck('tahun_ajaran');
+        }
+
         foreach ($listTahun as $tahun) {
             $alternatifs = Alternatif::with(['nilai_alternatif.subkriteria'])
                 ->where('tahun_ajaran', $tahun)
@@ -160,22 +175,40 @@ class RankingAkhirController extends Controller
 
         $kriteria = Kriteria::all();
 
-        if ($request->filled('tahun_ajaran')) {
-            $tahunAjarans = [$request->tahun_ajaran];
-        } else {
-            $tahunAjarans = Alternatif::distinct()->pluck('tahun_ajaran');
+        $tahunAjarans = Alternatif::distinct()->pluck('tahun_ajaran');
+
+        $ranking = [];
+        $validasi = [];
+
+        // Filter by tahun ajaran (kalau ada)
+        $listTahun = $request->filled('tahun_ajaran') ? [$request->tahun_ajaran] : $tahunAjarans;
+        $statusValidasi = $request->status_validasi;
+
+        if ($statusValidasi === 'Sudah') {
+            $listTahun = Alternatif::where('is_valid', 1)
+                ->distinct()
+                ->pluck('tahun_ajaran');
+        } elseif ($statusValidasi === 'Belum') {
+            $listTahun = Alternatif::where(function($q) {
+                    $q->whereNull('is_valid')
+                    ->orWhere('is_valid', 0);
+                })
+                ->distinct()
+                ->pluck('tahun_ajaran');
         }
 
         $spreadsheet = new Spreadsheet();
         $sheetIndex = 0;
 
-        foreach ($tahunAjarans as $tahun) {
+        foreach ($listTahun as $tahun) {
             if ($sheetIndex == 0) {
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setTitle($tahun);
+                $safeTitle = preg_replace('/[:\/\\?*\[\]]/', '-', $tahun);
+                $sheet->setTitle($safeTitle);
             } else {
                 $sheet = $spreadsheet->createSheet();
-                $sheet->setTitle($tahun);
+                $safeTitle = preg_replace('/[:\/\\?*\[\]]/', '-', $tahun);
+                $sheet->setTitle($safeTitle);
             }
 
             $alternatifs = Alternatif::with(['nilai_alternatif.subkriteria'])
@@ -265,58 +298,7 @@ class RankingAkhirController extends Controller
     {
         Alternatif::where('tahun_ajaran', $request->tahun_ajaran)->update(['is_valid' => true]);
 
-        return redirect()->route('ranking-akhir.index.admin')->with('success', 'Data berhasil disimpan');
+        return redirect()->route('ranking-akhir.user')->with('success', 'Data berhasil disimpan');
     }
 
-
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }
